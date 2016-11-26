@@ -50,7 +50,7 @@ function visitPage(url, callback) {
         if (searchForProducts($).length == 0) { // if its a product save it
             numProductCrawled++;
 
-            var product = scrapeProduct($);
+            var product = scrapeProduct($, url);
 
             // Scrape classification
             var hierarchie = $('div#hierarchie').find("a[href^='es/productos']");
@@ -76,7 +76,7 @@ function getTab($, tabName) {
         return;
 }
 
-function scrapeProduct($) {
+function scrapeProduct($, url) {
     var name = $("h1.entry-title").text().trim().replace("®", "");
     var description = $("div.chapo").html().replace(/(\r\n|\n|\r)/gm, "").trim();
 
@@ -87,11 +87,13 @@ function scrapeProduct($) {
     var especificaciones = tab ? tab.html().replace(/(\r\n|\n|\r)/gm, "").trim() : "";
 
     var codigo = $("h4.soustitre").text();
-    codigo = codigo.substring(codigo.indexOf("Ref. ") + 6, codigo.length);
+    var index_codigo = codigo.indexOf("Ref. ") + 6;
+    codigo = codigo.substring(index_codigo, index_codigo + 6);
 
     return product = {
         id: numProductCrawled,
         name: name,
+        url: url,
         imgs: [],
         descripcion: description,
         clasificacion: clasificacion,
