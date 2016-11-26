@@ -65,15 +65,12 @@ function visitPage(url, callback) {
 }
 
 function getTab($, tabName) {
-    var tabs = $("h2.tab").map(function() {
+    var index = $("h2.tab").map(function() {
         return $(this).text().toLowerCase();
-    }).get();
+    }).get().indexOf(tabName);
 
-    var index = tabs.indexOf(tabName);
     if (index > -1) // Search for tab with the index
         return $("div.tab-page").eq(index);
-    else
-        return;
 }
 
 function scrapeProduct($, url) {
@@ -81,22 +78,22 @@ function scrapeProduct($, url) {
     var description = $("div.chapo").html().replace(/(\r\n|\n|\r)/gm, "").trim();
 
     var tab = getTab($, "ventajas");
-    var clasificacion = tab ? tab.html().replace(/(\r\n|\n|\r)/gm, "").trim() : "";
+    var caracteristicas = tab ? tab.html().replace(/(\r\n|\n|\r)/gm, "").trim() : "";
 
     tab = getTab($, "especificaciones técnicas");
     var especificaciones = tab ? tab.html().replace(/(\r\n|\n|\r)/gm, "").trim() : "";
 
     var codigo = $("h4.soustitre").text();
-    var index_codigo = codigo.indexOf("Ref. ") + 6;
-    codigo = codigo.substring(index_codigo, index_codigo + 6);
+    var index_codigo = codigo.indexOf("Ref. ") + 5;
+    codigo = codigo.indexOf('(') == -1 ? codigo.substring(index_codigo, codigo.length).trim() : "";
 
-    return product = {
+    return {
         id: numProductCrawled,
         name: name,
         url: url,
         imgs: [],
         descripcion: description,
-        clasificacion: clasificacion,
+        caracteristicas: caracteristicas,
         especifiacaciones: especificaciones,
         codigo: codigo
     }
