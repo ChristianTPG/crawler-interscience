@@ -53,8 +53,8 @@ function visitPage(url, callback) {
             var product = scrapeProduct($, url);
 
             // Scrape classification
-            var hierarchie = $('div#hierarchie').find("a[href^='es/productos']");
-            addProduct($, product, hierarchie, productos);
+            var hierarchy = $('div#hierarchie').find("a[href^='es/productos']");
+            addProduct($, product, hierarchy, productos);
 
         } else // if its a collection of products then get all products links
             collectInternalLinks($);
@@ -80,6 +80,9 @@ function scrapeProduct($, url) {
     var tab = getTab($, "ventajas");
     var caracteristicas = tab ? tab.html().replace(/(\r\n|\n|\r)/gm, "").trim() : "";
 
+    tab = getTab($, "rasgos claves");
+    var rasgos_claves = tab ? tab.html().replace(/(\r\n|\n|\r)/gm, "").trim() : "";
+
     tab = getTab($, "especificaciones técnicas");
     var especificaciones = tab ? tab.html().replace(/(\r\n|\n|\r)/gm, "").trim() : "";
 
@@ -93,16 +96,16 @@ function scrapeProduct($, url) {
         url: url,
         imgs: [],
         descripcion: description,
-        caracteristicas: caracteristicas,
+        caracteristicas: caracteristicas == "" ? rasgos_claves : caracteristicas,
         especifiacaciones: especificaciones,
         codigo: codigo
     }
 }
 
-function buildClassification(product, hierarchie) {
+function buildClassification(product, hierarchy) {
 
-    var parentName = hierarchie.last().text(); // get clasification of product
-    hierarchie.splice(hierarchie.length - 1, 1);
+    var parentName = hierarchy.last().text(); // get clasification of product
+    hierarchy.splice(hierarchy.length - 1, 1);
 
     var parent = {
         name: parentName,
@@ -110,30 +113,30 @@ function buildClassification(product, hierarchie) {
         sub: [product]
     };
 
-    if (hierarchie.length > 0)
-        return buildClassification(parent, hierarchie);
+    if (hierarchy.length > 0)
+        return buildClassification(parent, hierarchy);
     else
         return parent;
 }
 
-function addProduct($, product, hierarchie, pProductos) {
+function addProduct($, product, hierarchy, pProductos) {
 
-    if (hierarchie.length == 0) { // No more parents found
-        pProductos.push(product); // Add product with its hierarchie
+    if (hierarchy.length == 0) { // No more parents found
+        pProductos.push(product); // Add product with its hierarchy
         return;
     }
 
-    var parentName = hierarchie.first().text(); // get clasification of product
+    var parentName = hierarchy.first().text(); // get clasification of product
     var parent = pProductos.filter(function(producto) {
         return producto.name == parentName;
     });
 
     if (parent.length > 0) {
-        hierarchie.splice(0, 1); // Found Parent, keep cycling
-        addProduct($, product, hierarchie, parent[0].sub);
+        hierarchy.splice(0, 1); // Found Parent, keep cycling
+        addProduct($, product, hierarchy, parent[0].sub);
     } else {
-        var newClassification = buildClassification(product, hierarchie); // Build parent hierarchie
-        addProduct($, newClassification, hierarchie, pProductos); // Add hierarchie
+        var newClassification = buildClassification(product, hierarchy); // Build parent hierarchy
+        addProduct($, newClassification, hierarchy, pProductos); // Add hierarchy
     }
 }
 
