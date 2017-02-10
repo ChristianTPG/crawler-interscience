@@ -97,7 +97,7 @@ function scrapeProduct($, url) {
         imgs: [],
         descripcion: description,
         caracteristicas: caracteristicas == "" ? rasgos_claves : caracteristicas,
-        especifiacaciones: especificaciones,
+        especificaciones: especificaciones,
         codigo: codigo
     }
 }
